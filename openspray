@@ -74,9 +74,6 @@ GREEN='\033[0;32m'
 echo -e "${RED}###################${NC}"
 echo -e "${RED}Starting OpenSpray!${NC}"
 echo -e "${RED}###################${NC}"
-echo "poop"
-echo $server
-echo "crap"
 if [ "$passAsUser" == "true" ];
 then
 	echo -e "${BLUE}Spraying username as password${NC}"
