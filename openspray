@@ -12,14 +12,18 @@ display_usage() {
 	echo -e " cd netExtenderClient"
 	echo -e " ./install"
 	echo -e " Set pppd to run as root [y/n]? y"
-	echo -e " export PATH=\"<netExtenderClient_path>:\$PATH\"\n\n"
+	echo -e " export PATH=\"<netExtenderClient_path>:\$PATH\""
+
+	echo -e "\nOptional addon for Fortinet"
+	echo -e " apt-get install openfortivpn"
+	echo -e "    https://github.com/adrienverge/openfortivpn\n"
 
 	echo -e "-h, --help\t\tDisplay help text"
 	echo -e "-f\t\t\tSet username file"
 	echo -e "-p\t\t\tSet password to spray"
 	echo -e "-b\t\t\tSet password file to spray"
 	echo -e "-s\t\t\tVPN Server"
-	echo -e "\t[sevrer[:port]] for SonicWall NetExtender VPN"
+	echo -e "\t[server[:port]] for SonicWall NetExtender VPN or Fortinet VPN"
 	echo -e "-d\t\t\tSonicWall VPN Domain (default=LocalDomain)"
 	echo -e "-v\t\t\tVPN Distro"
 	echo -e "\tanyconnect\tCisco AnyConnect SSL VPN"
@@ -27,6 +31,7 @@ display_usage() {
 	echo -e "\tgp\t\tPalo Alto GlobalProtect SSL VPN"
 	echo -e "\tpulse\t\tPulse Connect Secure SSL VPN"
 	echo -e "\tne\t\tSonicWall NetExtender SSL VPN"
+	echo -e "\tfn\t\tFortinet SSL VPN"
 	echo -e "\n-t\t\t\tSet sleep time between sprays (basic sleep commands; 5 = 5 seconds)"
 	echo -e "-c\t\t\tpin-sha256 hash from server; argument shaped like: -c pin-sha256:<cert> (not required for ne)"
 	echo -e "\t\t\t\tValue obtained from \`openconnect <server> --servercert=1234\`\n"
@@ -85,6 +90,10 @@ then
 		if [ "$protocol" == "ne" ];
 		then
 			yes Y | netExtender -u $i -p $i -d $domain $server
+
+		elif [ "$protocol" == "fn" ];
+				then
+					openfortivpn $server -u $i -p $i
 		else
 			echo $i | sudo openconnect $server --user=$i --passwd-on-stdin --protocol=$protocol --authenticate --servercert $cert
 		fi
@@ -107,6 +116,11 @@ else
 				if [ "$protocol" == "ne" ];
 				then
 					yes Y | netExtender -u $i -p $j -d $domain $server
+
+				elif [ "$protocol" == "fn" ];
+				then
+					openfortivpn $server -u $i -p $j 
+
 				else
 					echo $j | sudo openconnect $server --user=$i --passwd-on-stdin --protocol=$protocol --authenticate --servercert $cert
 				fi
@@ -128,6 +142,9 @@ else
 			if [ "$protocol" == "ne" ];
 			then
 				yes Y | netExtender -u $i -p $password -d $domain $server
+			elif [ "$protocol" == "fn" ];
+				then
+					openfortivpn $server -u $i -p $password 
 			else
 				echo $password | sudo openconnect $server --user=$i --passwd-on-stdin --protocol=$protocol --authenticate --servercert $cert
 			fi
