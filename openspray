@@ -20,7 +20,7 @@ display_usage() {
 
 	echo -e "-h, --help\t\tDisplay help text"
 	echo -e "-f\t\t\tSet username file"
-	echo -e "-p\t\t\tSet password to spray"
+	echo -e "-p\t\t\tSet password to spray; consider using included password file; replace <COMPANYNAME> where appropriate"
 	echo -e "-b\t\t\tSet password file to spray"
 	echo -e "-s\t\t\tVPN Server"
 	echo -e "\t[server[:port]] for SonicWall NetExtender VPN or Fortinet VPN"
@@ -32,7 +32,7 @@ display_usage() {
 	echo -e "\tpulse\t\tPulse Connect Secure SSL VPN"
 	echo -e "\tne\t\tSonicWall NetExtender SSL VPN"
 	echo -e "\tfn\t\tFortinet SSL VPN"
-	echo -e "\n-t\t\t\tSet sleep time between sprays (basic sleep commands; 5 = 5 seconds)"
+	echo -e "\n-t\t\t\tSet sleep time between sprays (basic sleep commands; 5 = 5 seconds; Fortinet should sleep for minimum of 30 seconds to avoid throttling threshold)"
 	echo -e "-c\t\t\tpin-sha256 hash from server; argument shaped like: -c pin-sha256:<cert> (not required for ne)"
 	echo -e "\t\t\t\tValue obtained from \`openconnect <server> --servercert=1234\`\n"
 	echo -e "-r\t\t\tSet password as username: true. Default: false"
