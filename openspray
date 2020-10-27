@@ -25,6 +25,7 @@ display_usage() {
 	echo -e "-s\t\t\tVPN Server"
 	echo -e "\t[server[:port]] for SonicWall NetExtender VPN or Fortinet VPN"
 	echo -e "-d\t\t\tSonicWall VPN Domain (default=LocalDomain)"
+	echo -e "-a\t\t\tOpenConnect authgroup"
 	echo -e "-v\t\t\tVPN Distro"
 	echo -e "\tanyconnect\tCisco AnyConnect SSL VPN"
 	echo -e "\tnc\t\tJuniper Network Connect"
@@ -54,7 +55,7 @@ display_usage() {
 passAsUser="false"
 password=""
 domain="LocalDomain"
-while getopts 'f:p:b:s:v:t:c:r:d:' option
+while getopts 'f:p:b:s:v:t:c:r:d:a:' option
 do
 	case "${option}"
 		in
@@ -67,8 +68,16 @@ do
 		c) cert=${OPTARG};;
 		r) passAsUser=${OPTARG};;
 		d) domain=${OPTARG};;
+		a) ag=${OPTARG};;
 	esac
 done
+
+if [ -z ${ag+x} ]; 
+then 
+	authgroup=""
+else
+	authgroup="--authgroup=${ag}"
+fi
  
 RED='\033[0;31m'
 NC='\033[0m'
@@ -95,7 +104,7 @@ then
 				then
 					openfortivpn $server -u $i -p $i
 		else
-			echo $i | sudo openconnect $server --user=$i --passwd-on-stdin --protocol=$protocol --authenticate --servercert $cert
+			echo $i | sudo openconnect $server --user=$i --passwd-on-stdin --protocol=$protocol --authenticate --servercert $cert $authgroup
 		fi
 
 		echo -e "${GREEN}%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%${NC}"
@@ -122,7 +131,7 @@ else
 					openfortivpn $server -u $i -p $j 
 
 				else
-					echo $j | sudo openconnect $server --user=$i --passwd-on-stdin --protocol=$protocol --authenticate --servercert $cert
+					echo $j | sudo openconnect $server --user=$i --passwd-on-stdin --protocol=$protocol --authenticate --servercert $cert $authgroup
 				fi
 
 				echo -e "${GREEN}%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%${NC}"
@@ -146,7 +155,7 @@ else
 				then
 					openfortivpn $server -u $i -p $password 
 			else
-				echo $password | sudo openconnect $server --user=$i --passwd-on-stdin --protocol=$protocol --authenticate --servercert $cert
+				echo $password | sudo openconnect $server --user=$i --passwd-on-stdin --protocol=$protocol --authenticate --servercert $cert $authgroup
 			fi
 
 			echo -e "${GREEN}%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%${NC}"
