@@ -23,7 +23,7 @@ display_usage() {
 	echo -e "    https://github.com/adrienverge/openfortivpn\n"
 
 	echo -e "\nOptional addon for Azure CLI"
-	echo -e " apt-get install azure-cli\n"
+	echo -e " curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash\n"
 
 	echo -e "-h, --help\t\tDisplay help text"
 	echo -e "-f\t\t\tSet username file"
