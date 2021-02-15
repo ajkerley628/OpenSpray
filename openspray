@@ -1,5 +1,9 @@
 #!/bin/bash
 display_usage() {
+	echo -e "Use \`script\` to log output to file!\n"
+	echo -e "script -c \"openspray -f usernames -b passwords -s <ip>:4433 -d <domain> -v ne -t 15\" openspray.log\n"
+
+
 	echo -e "Usage:\nopenspray [options]"
 	echo -e "\nsudo apt-get install openconnect"
 
